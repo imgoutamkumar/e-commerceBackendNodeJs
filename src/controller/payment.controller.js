@@ -9,9 +9,10 @@ const instance = new Razorpay({
 const checkout = async (req, res) => {
   const { amount } = req.body;
   console.log("amount", amount);
+  console.log("type of amount:", typeof amount);
   try {
     const options = {
-      amount: amount, // amount in the smallest currency unit
+      amount: amount * 100, // amount in the smallest currency unit
       currency: "INR",
       receipt: "order_rcptid_11",
     };
