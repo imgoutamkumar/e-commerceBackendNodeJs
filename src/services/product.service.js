@@ -55,13 +55,28 @@ const getProductByCategory = async (category) => {
 };
 
 const getProductByCategoryAndRating = async (category, rating) => {
-  const popularProducts = await Product.find({
-    $and: [{ category: category }, { numRatings: { $gt: rating } }],
-  });
-  return popularProducts;
+  console.log("category:", category, "noOfRating:", parseFloat(rating));
+  console.log(
+    "type of category:",
+    typeof category,
+    "type of numRating:",
+    typeof rating
+  );
+  try {
+    const popularProducts = await Product.find({
+      $and: [
+        { category: category },
+        { numRatings: { $gte: parseFloat(rating) } },
+      ],
+    });
+    console.log(popularProducts);
+    return popularProducts;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-const searchFilterAndPaginateProduct = async (reqData) => {
+/* const searchFilterAndPaginateProduct = async (reqData) => {
   try {
     console.log("searchFilterAndPaginateProduct service called");
     const categoryArray = await categoryService.getAllCategory();
@@ -72,7 +87,8 @@ const searchFilterAndPaginateProduct = async (reqData) => {
     console.log(reqData);
 
     const page = parseInt(reqData.page) - 1 || 0;
-    const limit = parseInt(reqData.limit) || 10;
+    const limit = parseInt(reqData.limit) || 15;
+    const brand = reqData.brand;
     const search = reqData.search || "";
     let category = reqData.category || "All";
 
@@ -81,7 +97,121 @@ const searchFilterAndPaginateProduct = async (reqData) => {
       : (category = category.split(","));
 
     const product = await Product.find({
-      title: { $regex: search, $options: "i" },
+      $text: { $search: search },
+
+      //title: { $regex: search, $options: "i" },
+    })
+      .sort({ score: { $meta: "textScore" } })
+      .where("category")
+      .in([...category])
+      .skip(page * limit);
+    console.log(product);
+    console.log("product count : ", product.length);
+    return product;
+  } catch (error) {
+    console.log(error);
+  }
+}; */
+
+const searchFilterAndPaginateProduct = async (reqData) => {
+  try {
+    console.log("searchFilterAndPaginateProduct service called");
+
+    //get distinct categories list
+    const categoryArray = await categoryService.getAllCategory();
+    let categories = categoryArray.map((c) => {
+      return c.name;
+    });
+
+    const allBrands = await Product.find({}, { brand: 1, _id: 0 })
+      .then(async (documents) => {
+        const list = documents.map((doc) => doc.brand);
+        const brandSet = new Set(list);
+        const brandList = [...brandSet];
+        return brandList; // Array containing the values of the desired field
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+    console.log("query:", reqData);
+
+    const page = parseInt(reqData.page) || 1;
+    const limit = parseInt(reqData.limit) || 10;
+    let brand = reqData.brand || "All";
+    const search = reqData.search || "";
+    let category = reqData.category || "All";
+
+    brand === "All" ? (brand = [...allBrands]) : (brand = brand.split(","));
+    //console.log(brand);
+
+    category === "All" ? (category = [...categories]) : (category = category);
+    //replace special character from search text
+
+    let skip = (page - 1) * limit;
+    const filteredProduct = await Product.find({
+      $and: [
+        { title: { $regex: search, $options: "i" } },
+        { brand: { $in: [...brand] } },
+        { category: category },
+      ],
+    });
+
+    const filteredProductPerPage = await Product.find({
+      $and: [
+        { title: { $regex: search, $options: "i" } },
+        { brand: { $in: [...brand] } },
+        { category: category },
+      ],
+    })
+      .skip(skip)
+      .limit(15);
+
+    return { filteredProduct, filteredProductPerPage };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+/* const searchFilterAndPaginateProduct = async (reqData) => {
+  try {
+    console.log("searchFilterAndPaginateProduct service called");
+
+    const categoryArray = await categoryService.getAllCategory();
+    let categories = categoryArray.map((c) => {
+      return c.name;
+    });
+    console.log(categories);
+
+    const allBrands = await Product.find({}, { brand: 1, _id: 0 })
+      .then(async (documents) => {
+        const list = documents.map((doc) => doc.brand);
+        const brandSet = new Set(list);
+        const brandList = [...brandSet];
+        console.log("brandList:", brandList);
+        return brandList; // Array containing the values of the desired field
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    console.log(allBrands);
+    console.log(reqData);
+
+    const page = parseInt(reqData.page) - 1 || 0;
+    const limit = parseInt(reqData.limit) || 10;
+    const brand = reqData.brand;
+    const search = reqData.search || "";
+    let category = reqData.category || "All";
+
+    // brand === "All" ? (brand = [...allBrands]) : (brand = brand.split(","));
+    console.log(brand);
+    category === "All"
+      ? (category = [...categories])
+      : (category = category.split(","));
+    //replace special character from search text
+
+    const product = await Product.find({
+      $or: [{ title: { $regex: search, $options: "i" } }, { brand: brand }],
     })
       .where("category")
       .in([...category])
@@ -92,7 +222,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
   } catch (error) {
     console.log(error);
   }
-};
+}; */
 
 module.exports = {
   createProduct,

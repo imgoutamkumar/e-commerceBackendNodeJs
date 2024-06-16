@@ -17,4 +17,14 @@ const getUserCart = async (req, res) => {
   }
 };
 
-module.exports = { addToCart, getUserCart };
+const removeCartItem = async (req, res) => {
+  console.log("removeCartItem controller called");
+  const message = await cartService.removeItemFromCart(
+    req.userId,
+    req.params.ProductId
+  );
+  res.send(message);
+  redis.del("cart");
+};
+
+module.exports = { addToCart, getUserCart, removeCartItem };

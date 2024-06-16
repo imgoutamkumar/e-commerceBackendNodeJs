@@ -7,4 +7,8 @@ router.get("/products/:category", productController.getAllProductByCategory);
 router.get("/products", productController.getAllProduct);
 router.get("/product/:productId", productController.getProductById);
 router.get("/allProducts/search", productController.getSearchFilterProduct);
+router.get(
+  "/Product/:category/:numRatings",
+  productController.getProductByCategoryAndRating
+);
 module.exports = router;

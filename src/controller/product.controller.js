@@ -27,7 +27,7 @@ const getProductByCategoryAndRating = async (req, res) => {
   try {
     const popularProducts = await productService.getProductByCategoryAndRating(
       req.params.category,
-      req.params.rating
+      req.params.numRatings
     );
     console.log("popularProducts count : ", popularProducts.length);
     res.status(200).json(popularProducts);
@@ -68,12 +68,13 @@ const getProductById = async (req, res) => {
 const getSearchFilterProduct = async (req, res) => {
   console.log("getSearchFilterSortAndPaginateProduct controller called");
   try {
-    const product = await productService.searchFilterAndPaginateProduct(
+    const productData = await productService.searchFilterAndPaginateProduct(
       req.query
     );
+    const { filteredProduct, filteredProductPerPage } = productData;
     return res.send({
-      productCount: product.length,
-      product,
+      productCount: filteredProduct.length,
+      products: filteredProductPerPage,
     });
   } catch (error) {
     console.log(error);

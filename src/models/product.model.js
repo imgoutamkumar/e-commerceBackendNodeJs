@@ -59,7 +59,8 @@ const productSchema = new mongoose.Schema(
       },
     ],
     numRatings: {
-      type: String,
+      //type: mongoose.Types.Decimal128,
+      type: Number,
       default: 0,
     },
     category: {
@@ -73,6 +74,10 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
+productSchema.index({ title: "text" });
+/* productSchema.index({ title: "text" }, (err, result) => {
+  if (err) console.error(err);
+  console.log("Text index created:", result);
+}); */
 const Product = mongoose.model("products", productSchema);
 module.exports = Product;

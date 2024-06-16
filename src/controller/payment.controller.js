@@ -27,7 +27,7 @@ const checkout = async (req, res) => {
 const verifyPayment = async (req, res) => {
   try {
     const { razorpay_payment_id, razorpay_signature } = req.body;
-
+    console.log(req.body);
     const verification = await razorpay.util.verifyPaymentSignature(
       req.body,
       process.env.KEY_SECRET

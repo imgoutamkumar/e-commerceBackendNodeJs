@@ -30,6 +30,7 @@ const removeWishlistItem = async (req, res) => {
     req.params.ProductId
   );
   res.send(message);
+  redis.del("wishlist");
 };
 
 module.exports = { addToWishlist, getUserWishlist, removeWishlistItem };

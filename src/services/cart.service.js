@@ -152,4 +152,26 @@ const addItemToCart = async (userId, reqData) => {
     console.log(error);
   }
 };
-module.exports = { createCart, findUserCartById, addItemToCart };
+
+const removeItemFromCart = async (userId, productId) => {
+  try {
+    let cart = await Cart.findOne({ userId: userId });
+    if (cart) {
+      const updatedCartItems = await cart.cartItems.filter(
+        (item) => item.product.toString() != productId.toString()
+      );
+      cart.cartItems = updatedCartItems;
+      cart.save();
+      return "Item removed from cart";
+    }
+    return "something went wrong";
+  } catch (error) {
+    console.log(error);
+  }
+};
+module.exports = {
+  createCart,
+  findUserCartById,
+  addItemToCart,
+  removeItemFromCart,
+};
