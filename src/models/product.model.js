@@ -60,7 +60,8 @@ const productSchema = new mongoose.Schema(
     ],
     numRatings: {
       //type: mongoose.Types.Decimal128,
-      type: Number,
+      type: mongoose.Schema.Types.Decimal128,
+      //type: Number,
       default: 0,
     },
     category: {

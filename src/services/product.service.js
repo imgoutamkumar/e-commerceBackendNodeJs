@@ -57,11 +57,17 @@ const getProductByCategory = async (category) => {
 const getProductByCategoryAndRating = async (category, rating) => {
   console.log("category:", category, "noOfRating:", parseFloat(rating));
   console.log(
-    "type of category:",
+    "category",
+    category,
+    "type :",
     typeof category,
-    "type of numRating:",
+    "rating",
+    rating,
+    "type :",
     typeof rating
   );
+  console.log(parseFloat(rating));
+  console.log(typeof parseFloat(rating));
   try {
     const popularProducts = await Product.find({
       $and: [
@@ -137,7 +143,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
     console.log("query:", reqData);
 
     const page = parseInt(reqData.page) || 1;
-    const limit = parseInt(reqData.limit) || 10;
+    // const limit = parseInt(reqData.limit) || 15;
     let brand = reqData.brand || "All";
     const search = reqData.search || "";
     let category = reqData.category || "All";
@@ -147,7 +153,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
 
     category === "All" ? (category = [...categories]) : (category = category);
     //replace special character from search text
-
+    const limit = 15;
     let skip = (page - 1) * limit;
     const filteredProduct = await Product.find({
       $and: [
