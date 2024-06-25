@@ -143,6 +143,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
     console.log("query:", reqData);
 
     const page = parseInt(reqData.page) || 1;
+    const discount = parseInt(reqData.discount) || 0;
     // const limit = parseInt(reqData.limit) || 15;
     let brand = reqData.brand || "All";
     const search = reqData.search || "";
@@ -160,6 +161,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
         { title: { $regex: search, $options: "i" } },
         { brand: { $in: [...brand] } },
         { category: category },
+        { discountPercent: { $gte: discount } },
       ],
     });
 
@@ -168,6 +170,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
         { title: { $regex: search, $options: "i" } },
         { brand: { $in: [...brand] } },
         { category: category },
+        { discountPercent: { $gte: discount } },
       ],
     })
       .skip(skip)
