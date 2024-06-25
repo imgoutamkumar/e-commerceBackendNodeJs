@@ -1,4 +1,4 @@
-const SubCategory = require("../models/subCategory");
+const SubCategory = require("../models/subCategory.model");
 
 const createSubCategory = async (reqData) => {
   try {
