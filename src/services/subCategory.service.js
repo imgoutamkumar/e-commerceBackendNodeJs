@@ -3,7 +3,9 @@ const SubCategory = require("../models/subCategory.model");
 const createSubCategory = async (reqData) => {
   try {
     let { name, parentCategory, description } = reqData;
-    const isSubCategoryExist = await SubCategory.findOne({ name });
+    const isSubCategoryExist = await SubCategory.findOne({
+      $and: [{ name: name }, { parentCategory: parentCategory }],
+    });
     if (isSubCategoryExist) {
       throw new Error("SubCategory already exist with this name : ", name);
     }
