@@ -3,7 +3,9 @@ const SubCategoryItems = require("../models/subCategoryItems.model");
 const createSubCategoryItem = async (reqData) => {
   try {
     let { name, subCategory, description } = reqData;
-    const isSubCategoryItemExist = await SubCategoryItems.findOne({ name });
+    const isSubCategoryItemExist = await SubCategoryItems.findOne({
+      $and: [{ name: name }, { subCategory: subCategory }],
+    });
     if (isSubCategoryItemExist) {
       throw new Error("SubCategoryItem already exist with this name : ", name);
     }

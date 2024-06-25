@@ -4,13 +4,20 @@ const categoryAndsubcategoryController = require("../controller/categoryAndsubca
 
 router.post("/category", categoryAndsubcategoryController.createNewCategory);
 router.get("/allCategories", categoryAndsubcategoryController.allCategories);
-router.post(
-  "/subCategories",
+router.get(
+  "/subCategories/:category",
   categoryAndsubcategoryController.getSubCategoriesByCategory
 );
 router.post(
   "/subCategory",
   categoryAndsubcategoryController.createNewSubCategory
 );
-
+router.get(
+  "/subCategoryItems/:subCategory",
+  categoryAndsubcategoryController.getSubCategoryItemsBySubCategory
+);
+router.post(
+  "/subCategoryItem",
+  categoryAndsubcategoryController.createNewSubCategoryItem
+);
 module.exports = router;
