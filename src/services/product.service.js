@@ -161,7 +161,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
         { title: { $regex: search, $options: "i" } },
         { brand: { $in: [...brand] } },
         { category: category },
-        { discountPercent: { $gte: discount } },
+        { discountPercent: { $gte: parseInt(discount) } },
       ],
     });
 
