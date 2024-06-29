@@ -144,8 +144,8 @@ const searchFilterAndPaginateProduct = async (reqData) => {
 
     const page = parseInt(reqData.page) || 1;
     const discount = parseInt(reqData.discount) || 0;
-    const maxPrice = 10000;
-    const minPrice = 0;
+    const minPrice = parseInt(reqData.minPrice);
+    const maxPrice = parseInt(reqData.maxPrice);
     // const limit = parseInt(reqData.limit) || 15;
     let brand = reqData.brand || "All";
     const search = reqData.search || "";
