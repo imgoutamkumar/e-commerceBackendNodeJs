@@ -144,6 +144,8 @@ const searchFilterAndPaginateProduct = async (reqData) => {
 
     const page = parseInt(reqData.page) || 1;
     const discount = parseInt(reqData.discount) || 0;
+    const maxPrice = 10000;
+    const minPrice = 0;
     // const limit = parseInt(reqData.limit) || 15;
     let brand = reqData.brand || "All";
     const search = reqData.search || "";
@@ -162,6 +164,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
         { brand: { $in: [...brand] } },
         { category: category },
         { discountPercent: { $gte: parseInt(discount) } },
+        { price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } },
       ],
     });
 
@@ -171,6 +174,7 @@ const searchFilterAndPaginateProduct = async (reqData) => {
         { brand: { $in: [...brand] } },
         { category: category },
         { discountPercent: { $gte: discount } },
+        { price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } },
       ],
     })
       .skip(skip)
