@@ -1,9 +1,14 @@
 const cartService = require("../services/cart.service");
 const { redis } = require("../config/redis");
+
 const addToCart = async (req, res) => {
-  const cart = await cartService.addItemToCart(req.userId, req.body);
-  redis.del("cart");
-  res.send(cart);
+  try {
+    const cart = await cartService.addItemToCart(req.userId, req.body);
+    redis.del("cart");
+    res.status(200).json(cart);
+  } catch (error) {
+    res.status(400).json(error);
+  }
 };
 
 const getUserCart = async (req, res) => {

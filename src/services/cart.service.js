@@ -106,50 +106,88 @@ const findUserCartById = async (userId) => {
 };
 const addItemToCart = async (userId, reqData) => {
   const { productId, quantity, size } = reqData;
+
   try {
     const cart = await Cart.findOne({ userId: userId }).populate(
       "cartItems.product"
     );
-
+    /* console.log(cart);
+    console.log(cart._id);
+    console.log(cart.userId);
+    console.log(cart.cartItems[0].product._id);
+    console.log(cart.cartItems[0].product.price); */
     if (!cart) {
       cart = await createCart(userId);
     }
 
-    const existingItem = await cart.cartItems.find(
-      (item) => item.product._id.toString() === productId.toString()
-    );
-    console.log("existingItem:", existingItem);
+    const existingItem = cart.cartItems.find((item) => {
+      item.product._id.toString() === productId.toString();
+    });
+
     if (existingItem) {
-      existingItem.quantity += quantity;
+      if (existingItem.quantity <= 5) {
+        existingItem.quantity += quantity;
+      }
       existingItem.size = size;
-      cart.save();
+
+      const total = cart.cartItems.reduce((acc, item) => {
+        return (
+          acc +
+          (item.product.price -
+            (item.product.price * item.product.discountPercent) / 100) *
+            item.quantity
+        );
+      }, 0);
+      console.log("total :", total, "type :", typeof total);
+      cart.totalPrice = Number(total);
+
+      const totalOriginalPrice = cart.cartItems.reduce((acc, item) => {
+        return acc + item.product.price * item.quantity;
+      }, 0);
+      console.log(
+        "totalOriginalPrice :",
+        totalOriginalPrice,
+        "type : ",
+        typeof totalOriginalPrice
+      );
+      cart.totalSavings = totalOriginalPrice - total;
+
+      await cart.save();
+      return "Item already present in the cart";
     } else {
-      await cart.cartItems.push({
+      cart.cartItems.push({
         product: productId,
         quantity: quantity,
         size: size,
       });
-      cart.save();
-    }
 
-    const total = cart.cartItems.reduce((acc, item) => {
-      return (
-        acc +
-        (item.product.price -
-          (item.product.price * item.product.discountPercent) / 100) *
-          item.quantity
+      const total = cart.cartItems.reduce((acc, item) => {
+        return (
+          acc +
+          (item.product.price -
+            (item.product.price * item.product.discountPercent) / 100) *
+            item.quantity
+        );
+      }, 0);
+      console.log("total :", total, "type :", typeof total);
+      cart.totalPrice = total;
+
+      const totalOriginalPrice = cart.cartItems.reduce((acc, item) => {
+        return acc + item.product.price * item.quantity;
+      }, 0);
+      console.log(
+        "totalOriginalPrice :",
+        totalOriginalPrice,
+        "type : ",
+        typeof totalOriginalPrice
       );
-    }, 0);
-    console.log("total:", total);
-    cart.totalPrice = Number(total);
-
-    const totalOriginalPrice = cart.cartItems.reduce((acc, item) => {
-      return acc + item.product.price * item.quantity;
-    }, 0);
-
-    cart.totalSavings = Number(totalOriginalPrice - total);
+      cart.totalSavings = totalOriginalPrice - total;
+      await cart.save();
+      return "Item added successfully";
+    }
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
