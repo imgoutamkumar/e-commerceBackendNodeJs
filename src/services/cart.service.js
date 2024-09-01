@@ -1,72 +1,5 @@
 const Cart = require("../models/cart.model");
 const { findProductbyId } = require("./product.service");
-/* const CartItem = require("../models/cartItem.model");
-const Product = require("../models/product.model"); */
-
-/* const createCart = async (user) => {
-  try {
-    const cart = new Cart({ user });
-    const createdCart = await cart.save();
-    return createdCart;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-const findUserCart = async (userId) => {
-  try {
-    const cart = Cart.findOne({ user: userId });
-    const cartItems = cart.find({ cart: card._id }).populate("product");
-    cart.cartItems = cartItems;
-    const totalPrice = 0;
-    const totaldiscountedPrice = 0;
-    const totalItem = 0;
-
-    for (let cartItem of cart.cartItems) {
-      totalPrice += cartItem.price;
-      totaldiscountedPrice += cartItem.discountedPrice;
-      totalItem += cartItem.quantity;
-    }
-
-    cart.totalPrice = totalPrice;
-    cart.totaldiscountedPrice = totaldiscountedPrice;
-    cart.totalItem = totalItem;
-
-    return cart;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-const addCartItem = async (userId, req) => {
-  try {
-    const cart = Cart.findOne({ user: userId });
-    const product = await Product.findById(req.productId);
-    const isPresent = await CartItem.findOne({
-      cart: cart._id,
-      product: product._id,
-      userId,
-    });
-    if (!isPresent) {
-      const cartItem = new CartItem({
-        product: product._id,
-        cart: cart._id,
-        quantity: 1,
-        userId: userId,
-        price: product.price,
-        size: req.size,
-        discountedPrice: product.discountedPrice,
-      });
-    }
-
-    const createdCartItem = await CartItem.save();
-    cart.cartItems.push(createdCartItem);
-    await cart.save();
-    return "item added to cart";
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}; */
 
 const createCart = async (userId) => {
   try {
@@ -89,7 +22,7 @@ const findUserCartById = async (userId) => {
       throw Error("cart didn't exist");
     }
 
-    const total = await cart.cartItems.reduce((acc, item) => {
+    const total = cart.cartItems.reduce((acc, item) => {
       return (
         acc +
         (item.product.price -
@@ -98,7 +31,15 @@ const findUserCartById = async (userId) => {
       );
     }, 0);
     console.log("total:", total);
+    cart.totalPrice = total;
 
+    const totalOriginalPrice = cart.cartItems.reduce((acc, item) => {
+      return acc + item.product.price * item.quantity;
+    }, 0);
+    console.log("totalOriginalPrice:", totalOriginalPrice);
+    cart.totalSavings = totalOriginalPrice - total;
+
+    await cart.save();
     return cart;
   } catch (error) {
     throw new Error(error.message);
@@ -122,7 +63,7 @@ const addItemToCart = async (userId, reqData) => {
     const cart = await Cart.findOne({ userId: userId }).populate(
       "cartItems.product"
     );
-    console.log(cart);
+    //console.log(cart);
     /* console.log(cart);
     console.log(cart._id);
     console.log(cart.userId);
@@ -136,7 +77,7 @@ const addItemToCart = async (userId, reqData) => {
     const existingItem = cart.cartItems.find((item) => {
       return item.product._id.toString() === productId.toString();
     });
-    console.log("existingItem : ", existingItem);
+    // console.log("existingItem : ", existingItem);
     if (existingItem) {
       console.log("Item already exist in the cart");
       if (existingItem.quantity <= 5) {
@@ -144,7 +85,7 @@ const addItemToCart = async (userId, reqData) => {
         existingItem.quantity = quantity;
       }
       existingItem.size = size;
-      const total = cart.cartItems.reduce((acc, item) => {
+      /*  const total = cart.cartItems.reduce((acc, item) => {
         return (
           acc +
           (item.product.price -
@@ -164,38 +105,53 @@ const addItemToCart = async (userId, reqData) => {
         "type : ",
         typeof totalOriginalPrice
       );
-      cart.totalSavings = totalOriginalPrice - total;
+      cart.totalSavings = totalOriginalPrice - total; */
 
       await cart.save();
       return "Item already present in the cart";
     } else {
+      console.log("else block executed");
       cart.cartItems.push({
         product: productId,
         quantity: quantity,
         size: size,
       });
+      // await cart.save();
+      /* console.log(cart);
+      console.log(cart.cartItems[1].product._id); */
 
-      const total = cart.cartItems.reduce((acc, item) => {
-        return (
+      cart.cartItems.forEach((item) => {
+        //console.log(item.product);
+        console.log(item.product._id);
+        console.log(item.product.price);
+        console.log(item.product.discountPercent);
+        console.log(item.quantity);
+      });
+
+      /* let total = cart.cartItems.reduce(
+        (acc, item) =>
           acc +
           (item.product.price -
             (item.product.price * item.product.discountPercent) / 100) *
-            item.quantity
-        );
-      }, 0);
-      console.log("total :", total, "type :", typeof total);
-      cart.totalPrice = total;
+            item.quantity,
 
-      const totalOriginalPrice = cart.cartItems.reduce((acc, item) => {
-        return acc + item.product.price * item.quantity;
-      }, 0);
+        0
+      );
+      console.log("total :", total, "type :", typeof total);
+      cart.totalPrice = Number(total);
+
+      let totalOriginalPrice = cart.cartItems.reduce(
+        (acc, item) => acc + item.product.price * item.quantity,
+        0
+      );
       console.log(
         "totalOriginalPrice :",
         totalOriginalPrice,
         "type : ",
         typeof totalOriginalPrice
       );
-      cart.totalSavings = totalOriginalPrice - total;
+      cart.totalSavings = totalOriginalPrice - total; */
+
       await cart.save();
       return "Item added successfully";
     }
@@ -213,6 +169,27 @@ const removeItemFromCart = async (userId, productId) => {
         (item) => item.product.toString() != productId.toString()
       );
       cart.cartItems = updatedCartItems;
+      /* const total = cart.cartItems.reduce((acc, item) => {
+        return (
+          acc +
+          (item.product.price -
+            (item.product.price * item.product.discountPercent) / 100) *
+            item.quantity
+        );
+      }, 0);
+      console.log("total :", total, "type :", typeof total);
+      cart.totalPrice = Number(total);
+
+      const totalOriginalPrice = cart.cartItems.reduce((acc, item) => {
+        return acc + item.product.price * item.quantity;
+      }, 0);
+      console.log(
+        "totalOriginalPrice :",
+        totalOriginalPrice,
+        "type : ",
+        typeof totalOriginalPrice
+      );
+      cart.totalSavings = totalOriginalPrice - total; */
       cart.save();
       return "Item removed from cart";
     }

@@ -14,8 +14,10 @@ const addToCart = async (req, res) => {
 const getUserCart = async (req, res) => {
   const cart = await redis.get("cart");
   if (cart) {
+    console.log("if block executed");
     return res.json(JSON.parse(cart));
   } else {
+    console.log("else block executed");
     const cart = await cartService.findUserCartById(req.userId);
     await redis.set("cart", JSON.stringify(cart));
     res.json(cart);
@@ -28,8 +30,8 @@ const removeCartItem = async (req, res) => {
     req.userId,
     req.params.ProductId
   );
-  res.send(message);
   redis.del("cart");
+  res.send(message);
 };
 
 module.exports = { addToCart, getUserCart, removeCartItem };
